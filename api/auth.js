@@ -15,7 +15,16 @@ let users = {
   'test': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'   // password: test123
 };
 
-// Root endpoint
+// Root endpoint - UPDATED FOR VERCEL
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Flutter Auth API berjalan!',
+    timestamp: new Date().toISOString(),
+    totalUsers: Object.keys(users).length
+  });
+});
+
+// Root endpoint with /api prefix
 app.get('/api', (req, res) => {
   res.json({ 
     message: 'Flutter Auth API berjalan!',
@@ -25,7 +34,7 @@ app.get('/api', (req, res) => {
 });
 
 // Register endpoint
-app.post('/api/register', async (req, res) => {
+app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -66,7 +75,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // Login endpoint  
-app.post('/api/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
 
@@ -112,7 +121,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // Get users endpoint
-app.get('/api/users', (req, res) => {
+app.get('/users', (req, res) => {
   const userList = Object.keys(users).map(username => ({
     username: username
   }));
@@ -124,9 +133,5 @@ app.get('/api/users', (req, res) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
+// Export for Vercel
 module.exports = app;
