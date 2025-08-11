@@ -8,14 +8,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// In-memory storage untuk demo (dalam production gunakan database)
+// In-memory users (demo)
 let users = {
   'admin': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: admin123
   'user1': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password: password1
   'test': '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'   // password: test123
 };
 
-// Root endpoint - UPDATED FOR VERCEL
+// Root endpoint
 app.get('/', (req, res) => {
   res.json({ 
     message: 'Flutter Auth API berjalan!',
@@ -24,7 +24,7 @@ app.get('/', (req, res) => {
   });
 });
 
-// Root endpoint with /api prefix
+// API prefix
 app.get('/api', (req, res) => {
   res.json({ 
     message: 'Flutter Auth API berjalan!',
@@ -33,105 +33,50 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Register endpoint
+// Register
 app.post('/register', async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    // Validasi input
     if (!username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Username dan password harus diisi' 
-      });
+      return res.status(400).json({ success: false, message: 'Username dan password harus diisi' });
     }
-
-    // Cek username sudah ada
     if (users[username]) {
-      return res.status(409).json({ 
-        success: false, 
-        message: 'Username sudah digunakan' 
-      });
+      return res.status(409).json({ success: false, message: 'Username sudah digunakan' });
     }
-
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
     users[username] = hashedPassword;
-
-    res.status(201).json({ 
-      success: true, 
-      message: 'Registrasi berhasil',
-      username: username,
-      totalUsers: Object.keys(users).length
-    });
-
+    res.status(201).json({ success: true, message: 'Registrasi berhasil', username, totalUsers: Object.keys(users).length });
   } catch (error) {
     console.error('Register error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error' 
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Login endpoint  
+// Login
 app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    // Validasi input
     if (!username || !password) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Username dan password harus diisi' 
-      });
+      return res.status(400).json({ success: false, message: 'Username dan password harus diisi' });
     }
-
-    // Cek username ada
     if (!users[username]) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Username tidak ditemukan' 
-      });
+      return res.status(401).json({ success: false, message: 'Username tidak ditemukan' });
     }
-
-    // Verify password
     const isValid = await bcrypt.compare(password, users[username]);
-    
     if (!isValid) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Password salah' 
-      });
+      return res.status(401).json({ success: false, message: 'Password salah' });
     }
-
-    res.json({ 
-      success: true, 
-      message: 'Login berhasil',
-      username: username
-    });
-
+    res.json({ success: true, message: 'Login berhasil', username });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Server error' 
-    });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-// Get users endpoint
+// List users
 app.get('/users', (req, res) => {
-  const userList = Object.keys(users).map(username => ({
-    username: username
-  }));
-
-  res.json({ 
-    success: true, 
-    total: userList.length,
-    users: userList 
-  });
+  const userList = Object.keys(users).map(username => ({ username }));
+  res.json({ success: true, total: userList.length, users: userList });
 });
 
-// Export for Vercel
 module.exports = app;
